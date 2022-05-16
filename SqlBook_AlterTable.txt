@@ -1,0 +1,4 @@
+Q1
+
+ALTER TABLE encyclopedia
+  RENAME TO 
