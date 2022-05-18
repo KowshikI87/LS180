@@ -22,50 +22,172 @@ CREATE TABLE animals (
   conservation_status char(2)
 );
 
-ALTER TABLE famous_people 
-  RENAME TO celebrities;
+ALTER TABLE famous_people RENAME TO celebrities;
 
+ALTER TABLE celebrities RENAME COLUMN name TO first_name;
+ALTER TABLE celebrities ALTER COLUMN first_name TYPE varchar(80);
 
-ALTER TABLE celebrities
-  RENAME COLUMN name TO first_name;
+ALTER TABLE celebrities ADD COLUMN last_name varchar(100) NOT NULL;
 
-ALTER TABLE celebrities 
-  ALTER COLUMN first_name TYPE varchar(80);
+ALTER TABLE celebrities ALTER COLUMN date_of_birth TYPE date USING date_of_birth::date;
 
-ALTER TABLE celebrities
-  ADD COLUMN last_name varchar(100) 
-  NOT NULL;
+ALTER TABLE animals ALTER COLUMN max_weight_kg TYPE decimal(10, 4);
 
-ALTER TABLE celebrities
-  ALTER COLUMN date_of_birth TYPE date
-    USING date_of_birth::date,
-  ALTER COLUMN date_of_birth 
-    SET NOT NULL;
+ALTER TABLE animals ADD CONSTRAINT unique_binomial_name UNIQUE(binomial_name);
 
-ALTER TABLE animals
-  ALTER COLUMN max_weight_kg TYPE decimal(10,4);
-
-ALTER TABLE animals
-  ADD CONSTRAINT unique_binomial_name UNIQUE
-  (binomial_name);
-
-ALTER TABLE orders
-  ADD COLUMN customer_email varchar(50),
-  ADD COLUMN customer_loyalty_points integer 
-    DEFAULT 0;
-
-ALTER TABLE orders
-  ADD COLUMN burger_cost decimal(4,2) DEFAULT 0,
-  ADD COLUMN side_cost decimal(4,2) DEFAULT 0,
-  ADD COLUMN drink_cost decimal(4,2) DEFAULT 0;
-
-ALTER TABLE orders 
-  DROP COLUMN order_total;
+INSERT INTO countries (name, capital, population) VALUES ('France', 'Paris', 67158000);
 
 INSERT INTO countries (name, capital, population)
-             VALUES ('France', 'Paris', 67158000);
+  VALUES ('USA', 'Washington D.C.', 325365189),
+         ('Germany', 'Berlin', 82349400),
+         ('Japan', 'Tokyo', 126672000);
 
-INSERT INTO countries (name, capital, population)
-             VALUES ('USA', 'Washington D.C.', 325365189),
-                    ('Germany', 'Berlin', 82349400),
-                    ('Japan', 'Tokyo', 126672000);
+INSERT INTO celebrities (first_name, last_name, occupation, date_of_birth, deceased)
+  VALUES ('Bruce', 'Springsteen', 'Singer, Songwriter', '1949-09-23', false),
+         ('Scarlett', 'Johansson', 'Actress', '1984-11-22', DEFAULT),
+         ('Frank', 'Sinatran', 'Singer', '1915-12-12', true),
+         ('Tom', 'Cruise', 'Actor', '1962-07-03', DEFAULT);
+
+ALTER TABLE celebrities ALTER COLUMN last_name DROP NOT NULL;
+
+INSERT INTO celebrities (first_name, last_name, occupation, date_of_birth, deceased)
+  VALUES ('Madonna', NULL, 'Singer, Actress', '1958-09-23', DEFAULT),
+         ('Prince', NULL, 'Singer, Songwriter, Musician, Actor', '1958-11-22', true),
+         ('Elvis', 'Presley', 'Singer, Musician, Actor', '1935-01-08', NULL);
+
+ALTER TABLE animals DROP CONSTRAINT unique_binomial_name;
+
+INSERT INTO animals (name, binomial_name, max_weight_kg, max_age_years, conservation_status)
+  VALUES ('Dove', 'Columbidae Columbiformes', 2, 15, 'LC'),
+         ('Golden Eagle', 'Aquila Chrysaetos', 6.35, 24, 'LC'),
+         ('Peregrine Falcon', 'Falco Peregrinus', 1.5, 15, 'LC'),
+         ('Pigeon', 'Columbidae Columbiformes', 2, 15, 'LC'),
+         ('Kakapo', 'Strigops habroptila', 4, 60, 'CR');
+
+SELECT population 
+FROM countries 
+WHERE name = 'USA';
+
+SELECT population, capital 
+FROM countries;
+
+SELECT name 
+FROM countries 
+ORDER BY name;
+
+SELECT name, capital 
+FROM countries 
+ORDER BY population;
+
+SELECT name, capital 
+FROM countries 
+ORDER BY population ASC;
+
+SELECT name, binomial_name, max_weight_kg, max_age_years 
+FROM animals 
+ORDER BY max_age_years;
+
+SELECT name 
+FROM countries 
+WHERE population > 70000000 AND population < 200000000;
+
+SELECT first_name, last_name 
+FROM celebrities 
+WHERE deceased != true OR deceased IS NULL;
+
+SELECT first_name, last_name, occupation 
+FROM celebrities 
+WHERE occupation LIKE '%Singer%';
+
+SELECT first_name, last_name, occupation 
+FROM celebrities 
+WHERE occupation LIKE '%Act%';
+
+SELECT first_name, last_name, occupation 
+FROM celebrities 
+WHERE (occupation LIKE '%Actor%' OR occupation LIKE '%Actress%') AND occupation LIKE '%Singer%';
+
+
+
+SELECT name
+FROM countries
+WHERE population = max(population);
+
+SELECT name FROM countries
+ORDER BY population DESC
+LIMIT 1;
+
+
+SELECT binomial_name 
+FROM animals
+ORDER BY length(binomial_name) DESC
+LIMIT 1;
+
+SELECT first_name
+FROM celebrities
+WHERE date_part('year', date_of_birth) = 1958
+LIMIT 1;
+
+SELECT max(max_age_years)
+FROM animals;
+
+SELECT count(name)
+FROM countries;
+
+SELECT sum(population)
+FROM countries;
+
+SELECT conservation_status, count(conservation_status)
+FROM animals
+GROUP BY conservation_status;
+
+ALTER TABLE animals
+  ADD COLUMN class varchar(100);
+
+UPDATE animals
+SET class = 'Aves';
+
+ALTER TABLE animals
+  ADD COLUMN phylum varchar(100),
+  ADD COLUMN kingdom varchar(100);
+
+UPDATE animals
+SET phylum = 'Chordata', kingdom = 'Animalia';
+
+ALTER TABLE countries
+  ADD COLUMN continent varchar(50);
+
+ALTER TABLE countries
+ADD COLUMN continent varchar(50);
+
+UPDATE countries
+SET continent = 'North America'
+WHERE name = 'USA';
+
+UPDATE countries
+SET continent = 'Asia'
+WHERE name = 'Japan';
+
+UPDATE countries
+SET continent = 'Europe'
+WHERE name = 'France' OR name = 'Germany';
+
+UPDATE celebrities
+SET deceased = false
+WHERE first_name = 'Elvis';
+
+ALTER TABLE celebrities
+ALTER COLUMN deceased 
+SET NOT NULL:
+
+DELETE FROM celebrities
+WHERE first_name = 'Tom'
+AND last_name = 'Cruise';
+
+ALTER TABLE celebrities
+RENAME TO singers;
+
+DELETE FROM celebrities
+WHERE occupation NOT LIKE '%Singer%';
+
+DELETE FROM countries;
